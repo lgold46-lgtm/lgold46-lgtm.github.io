@@ -6,15 +6,15 @@ const PAYFAST_CONFIG = {
   // Currently using TEST credentials for sandbox testing
   // Get your LIVE credentials from: https://www.payfast.co.za/user/login (login to dashboard)
   // Go to: Settings → Merchant Profile → Merchant Details
-  merchantId: '10000100', // Test Merchant ID (change to your live ID when ready)
-  merchantKey: '46f1db6c4f61c1997cdb629c387acc63', // Test Merchant Key (change to your live key)
+  merchantId: '35536981', // Test Merchant ID (change to your live ID when ready)
+  merchantKey: 'da4chlijuqlgd', // Test Merchant Key (change to your live key)
   
   // PayFast URLs
   testUrl: 'https://sandbox.payfast.co.za/eng/process', // Test/Sandbox
   liveUrl: 'https://www.payfast.co.za/eng/process', // Live
   
   // Use test or live (true = test mode, false = live)
-  testMode: true,
+  testMode: false,
   
   // Your website domain
   returnUrl: window.location.origin + '/success.html', // Where to redirect after payment
