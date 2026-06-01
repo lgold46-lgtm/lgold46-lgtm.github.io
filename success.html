@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Successful - Mason's Little Aid</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <style>
+    :root {
+      --olive:       #909180;
+      --dark-brown:  #372c21;
+      --cream:       #e0d4c3;
+      --cream-light: #ede5d8;
+      --cream-dark:  #cfc1aa;
+      --white:       #faf7f3;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--white);
+      color: var(--dark-brown);
+      font-family: 'Nunito', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .success-container {
+      text-align: center;
+      max-width: 600px;
+    }
+
+    .success-icon {
+      font-size: 4rem;
+      margin-bottom: 2rem;
+      animation: bounce 0.6s;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      color: var(--dark-brown);
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .success-message {
+      font-size: 1.1rem;
+      color: var(--dark-brown);
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+
+    .order-details {
+      background: var(--cream-light);
+      padding: 2rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      text-align: left;
+    }
+
+    .order-details h2 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--olive);
+    }
+
+    .order-detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(55, 44, 33, 0.1);
+    }
+
+    .order-detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .order-detail-row strong {
+      color: var(--dark-brown);
+    }
+
+    .next-steps {
+      background: var(--cream);
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      text-align: left;
+    }
+
+    .next-steps h3 {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      color: var(--dark-brown);
+    }
+
+    .next-steps ol {
+      margin-left: 1.5rem;
+      line-height: 1.8;
+    }
+
+    .next-steps li {
+      margin-bottom: 0.5rem;
+    }
+
+    .btn-back {
+      background: var(--olive);
+      color: var(--white);
+      border: none;
+      padding: 0.9rem 2.4rem;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.25s, transform 0.2s;
+      display: inline-block;
+      min-height: 44px;
+      border-radius: 4px;
+    }
+
+    .btn-back:hover {
+      background: var(--dark-brown);
+      transform: translateY(-2px);
+    }
+
+    .btn-back:active {
+      transform: translateY(0);
+    }
+
+    .error-message {
+      color: #d32f2f;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .order-details {
+        padding: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="success-container">
+    <div class="success-icon">✓</div>
+    <h1>Thank You!</h1>
+    <p class="success-message">Your order has been confirmed and will be processed shortly.</p>
+
+    <div class="order-details" id="orderDetails" style="display: none;">
+      <h2>Order Summary</h2>
+      <div class="order-detail-row">
+        <span>Order ID:</span>
+        <strong id="orderId">-</strong>
+      </div>
+      <div class="order-detail-row">
+        <span>Email:</span>
+        <strong id="orderEmail">-</strong>
+      </div>
+      <div class="order-detail-row">
+        <span>Status:</span>
+        <strong id="orderStatus">Processing</strong>
+      </div>
+    </div>
+
+    <div class="next-steps">
+      <h3>What's Next?</h3>
+      <ol>
+        <li>A confirmation email will be sent to your email address within minutes</li>
+        <li>Your order will be packed with care</li>
+        <li>You'll receive tracking information once it ships</li>
+        <li>Questions? Contact us at <strong>masonslittleaid@icloud.com</strong></li>
+      </ol>
+    </div>
+
+    <div class="error-message" id="errorMessage"></div>
+
+    <a href="/" class="btn-back">Continue Shopping</a>
+  </div>
+
+  <script>
+    // Handle PayFast return details
+    function loadOrderDetails() {
+      // PayFast may return transaction details in URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const transactionId = urlParams.get('m_payment_id') || urlParams.get('transaction_id');
+      
+      // Show order details if we have a transaction ID
+      if (transactionId) {
+        document.getElementById('orderDetails').style.display = 'block';
+        document.getElementById('orderId').textContent = transactionId;
+        
+        // You can optionally show PayFast transaction link
+        const email = urlParams.get('email_address');
+        if (email) {
+          document.getElementById('orderEmail').textContent = email;
+        }
+      }
+    }
+
+    // Load details when page loads
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadOrderDetails);
+    } else {
+      loadOrderDetails();
+    }
+  </script>
+</body>
+</html>
