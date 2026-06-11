@@ -39,6 +39,23 @@ const PAYFAST_CONFIG = {
       itemId: 'comfort-bag'
     }
   }
+  shipping: {
+  standard: {
+    label: 'Collection',
+    description: '1–7 business days',
+    price: 00.00
+  },
+  express: {
+    label: 'Courier Guy Locker',
+    description: '2–3 business days',
+    price: 75.00
+  },
+  overnight: {
+    label: 'Door-to-door',
+    description: '1-3 business days',
+    price: 130.00
+  }
+}
 };
 
 // Validate configuration
