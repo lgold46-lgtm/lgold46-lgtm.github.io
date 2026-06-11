@@ -43,7 +43,7 @@ const PAYFAST_CONFIG = {
   standard: {
     label: 'Collection',
     description: '1–7 business days',
-    price: 00.00
+    price: 0.00
   },
   express: {
     label: 'Courier Guy Locker',
