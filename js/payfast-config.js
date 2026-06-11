@@ -38,7 +38,7 @@ const PAYFAST_CONFIG = {
       price: 350.00,
       itemId: 'comfort-bag'
     }
-  }
+  },
   shipping: {
   standard: {
     label: 'Collection',
