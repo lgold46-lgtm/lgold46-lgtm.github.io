@@ -47,12 +47,12 @@ const PAYFAST_CONFIG = {
   },
   express: {
     label: 'Courier Guy Locker',
-    description: '2–3 business days',
+    description: '2–7 business days',
     price: 75.00
   },
   overnight: {
     label: 'Door-to-door',
-    description: '1-3 business days',
+    description: '4-7 business days',
     price: 130.00
   }
 }
