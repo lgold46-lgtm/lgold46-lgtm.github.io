@@ -21,13 +21,6 @@ class PayFastCheckout {
   initiateCheckout(productKey) {
     const product = this.products[productKey];
     if (!product) { alert('Product not found'); return; }
-
-    if (PAYFAST_CONFIG.merchantId === 'YOUR_MERCHANT_ID' ||
-        PAYFAST_CONFIG.merchantKey === 'YOUR_MERCHANT_KEY') {
-      alert('Payment system is not configured yet. Please contact us directly.');
-      return;
-    }
-
     this.currentProduct = product;
     this.selectedShipping = null;
     this.openModal(product);
@@ -208,12 +201,10 @@ class PayFastCheckout {
     `;
     document.body.appendChild(overlay);
 
-    // Close handlers
     document.getElementById('mlaModalClose').addEventListener('click', () => this.closeModal());
     overlay.addEventListener('click', (e) => { if (e.target === overlay) this.closeModal(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') this.closeModal(); });
 
-    // Proceed button
     document.getElementById('mlaModalProceed').addEventListener('click', () => {
       if (this.selectedShipping && this.currentProduct) {
         const shippingOption = this.shipping[this.selectedShipping];
@@ -231,16 +222,12 @@ class PayFastCheckout {
     const totalEl = document.getElementById('mlaTotalAmount');
     const proceedBtn = document.getElementById('mlaModalProceed');
 
-    // Set product line
     productLine.textContent = `${product.name} — R${product.price.toFixed(2)}`;
-
-    // Reset state
     totalEl.textContent = '—';
     totalEl.classList.remove('confirmed');
     proceedBtn.disabled = true;
     this.selectedShipping = null;
 
-    // Build shipping options
     optionsContainer.innerHTML = '';
     Object.entries(this.shipping).forEach(([key, option]) => {
       const el = document.createElement('label');
@@ -251,7 +238,7 @@ class PayFastCheckout {
           <span class="mla-shipping-option-name">${option.label}</span>
           <span class="mla-shipping-option-desc">${option.description}</span>
         </div>
-        <span class="mla-shipping-option-price">R${option.price.toFixed(2)}</span>
+        <span class="mla-shipping-option-price">${option.price === 0 ? 'Free' : 'R' + option.price.toFixed(2)}</span>
       `;
       el.querySelector('input').addEventListener('change', () => {
         document.querySelectorAll('.mla-shipping-option').forEach(o => o.classList.remove('selected'));
@@ -274,27 +261,6 @@ class PayFastCheckout {
     document.body.style.overflow = '';
   }
 
-  generateSignature(data) {
-    let sigStr = '';
-    const orderedKeys = [
-      'merchant_id', 'merchant_key', 'return_url', 'cancel_url', 'notify_url',
-      'name_first', 'name_last', 'email_address',
-      'item_name', 'item_description', 'custom_str1',
-      'amount', 'currency'
-    ];
-    orderedKeys.forEach(key => {
-      if (data[key] !== undefined && data[key] !== '') {
-        sigStr += `${key}=${encodeURIComponent(data[key]).replace(/%20/g, '+')}&`;
-      }
-    });
-    // Remove trailing &
-    sigStr = sigStr.slice(0, -1);
-    if (PAYFAST_CONFIG.passPhrase) {
-      sigStr += `&passphrase=${encodeURIComponent(PAYFAST_CONFIG.passPhrase)}`;
-    }
-    return CryptoJS.MD5(sigStr).toString();
-  }
-
   submitPayment(product, shippingOption, total) {
     const reference = `MLA-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -313,12 +279,6 @@ class PayFastCheckout {
       amount: total.toFixed(2),
       currency: PAYFAST_CONFIG.currency
     };
-
-    try {
-      paymentData.signature = this.generateSignature(paymentData);
-    } catch (e) {
-      console.warn('Signature generation failed:', e);
-    }
 
     const form = document.createElement('form');
     form.method = 'POST';
