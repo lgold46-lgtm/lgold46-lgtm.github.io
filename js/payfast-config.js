@@ -42,7 +42,7 @@ const PAYFAST_CONFIG = {
   shipping: {
   standard: {
     label: 'Collection',
-    description: '1–7 business days',
+    description: '1–7 business days · 10 Bonnie Brae Avenue, Kraaifontein',
     price: 0.00
   },
   express: {
