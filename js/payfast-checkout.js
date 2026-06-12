@@ -28,6 +28,7 @@ class PayFastCheckout {
   }
 
   injectModal() {
+    const self = this;
     const style = document.createElement('style');
     style.textContent = `
       .mla-modal-overlay {
@@ -321,7 +322,6 @@ class PayFastCheckout {
     `;
     document.body.appendChild(overlay);
 
-    const self = this;
     document.getElementById('mlaModalClose').addEventListener('click', () => self.closeModal());
     overlay.addEventListener('click', (e) => { if (e.target === overlay) self.closeModal(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') self.closeModal(); });
