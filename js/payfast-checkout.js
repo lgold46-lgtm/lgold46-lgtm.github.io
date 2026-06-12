@@ -246,9 +246,10 @@ class PayFastCheckout {
     `;
     document.body.appendChild(overlay);
 
-    document.getElementById('mlaModalClose').addEventListener('click', () => this.closeModal());
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) this.closeModal(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') this.closeModal(); });
+    const self = this;
+    document.getElementById('mlaModalClose').addEventListener('click', () => self.closeModal());
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) self.closeModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') self.closeModal(); });
 
     document.getElementById('mlaModalProceed').addEventListener('click', () => {
       if (this.selectedShipping && this.currentProduct) {
