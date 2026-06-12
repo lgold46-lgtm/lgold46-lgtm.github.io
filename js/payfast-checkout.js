@@ -472,6 +472,7 @@ submitPayment(product, shippingOption, total, firstName, lastName, email, phone)
 
     document.body.appendChild(form);
     form.submit();
+    }
 }
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => new PayFastCheckout());
