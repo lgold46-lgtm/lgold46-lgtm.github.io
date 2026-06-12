@@ -49,7 +49,13 @@ class PayFastCheckout {
         padding: 2.8rem;
         position: relative;
         animation: modalIn .25s ease;
+        max-height: 90vh;
+        overflow-y: auto;
+        overscroll-behavior: contain;
       }
+      .mla-modal::-webkit-scrollbar { width: 4px; }
+      .mla-modal::-webkit-scrollbar-track { background: transparent; }
+      .mla-modal::-webkit-scrollbar-thumb { background: #909180; border-radius: 999px; }
       @keyframes modalIn {
         from { opacity: 0; transform: translateY(16px); }
         to   { opacity: 1; transform: translateY(0); }
