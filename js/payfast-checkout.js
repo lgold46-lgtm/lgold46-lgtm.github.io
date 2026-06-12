@@ -4,6 +4,7 @@ class PayFastCheckout {
     this.shipping = PAYFAST_CONFIG.shipping;
     this.selectedShipping = null;
     this.currentProduct = null;
+    this.quantity = 1;
     this.setupEventListeners();
     this.injectModal();
   }
@@ -176,6 +177,41 @@ class PayFastCheckout {
         text-align: center;
         margin-top: 0.9rem;
       }
+      .mla-quantity-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+      }
+      .mla-qty-btn {
+        width: 2.2rem;
+        height: 2.2rem;
+        border: 1px solid #cfc1aa;
+        background: #fff;
+        color: #372c21;
+        font-size: 1.2rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: border-color 0.2s, background 0.2s;
+        flex-shrink: 0;
+        line-height: 1;
+      }
+      .mla-qty-btn:hover { border-color: #909180; background: #ede5d8; }
+      .mla-qty-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+      .mla-qty-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #372c21;
+        min-width: 1.5rem;
+        text-align: center;
+      }
+      .mla-qty-subtotal {
+        font-size: 0.82rem;
+        color: #909180;
+        margin-left: 0.4rem;
+      }
     `;
     document.head.appendChild(style);
 
@@ -217,7 +253,7 @@ class PayFastCheckout {
     document.getElementById('mlaModalProceed').addEventListener('click', () => {
       if (this.selectedShipping && this.currentProduct) {
         const shippingOption = this.shipping[this.selectedShipping];
-        const total = this.currentProduct.price + shippingOption.price;
+        const total = (this.currentProduct.price * this.quantity) + shippingOption.price;
         this.submitPayment(this.currentProduct, shippingOption, total);
         this.closeModal();
       }
@@ -230,13 +266,45 @@ class PayFastCheckout {
     const optionsContainer = document.getElementById('mlaShippingOptions');
     const totalEl = document.getElementById('mlaTotalAmount');
     const proceedBtn = document.getElementById('mlaModalProceed');
+    const qtyValue = document.getElementById('mlaQtyValue');
+    const qtySubtotal = document.getElementById('mlaQtySubtotal');
+    const qtyMinus = document.getElementById('mlaQtyMinus');
+    const qtyPlus = document.getElementById('mlaQtyPlus');
 
-    productLine.textContent = `${product.name} — R${product.price.toFixed(2)}`;
+    // Reset
+    productLine.textContent = `${product.name} — R${product.price.toFixed(2)} each`;
     totalEl.textContent = '—';
     totalEl.classList.remove('confirmed');
     proceedBtn.disabled = true;
     this.selectedShipping = null;
+    this.quantity = 1;
 
+    // Quantity display update helper
+    const updateTotal = () => {
+      const shippingPrice = this.selectedShipping ? this.shipping[this.selectedShipping].price : null;
+      qtySubtotal.textContent = `R${(product.price * this.quantity).toFixed(2)}`;
+      qtyMinus.disabled = this.quantity <= 1;
+      qtyValue.textContent = this.quantity;
+      if (shippingPrice !== null) {
+        const total = (product.price * this.quantity) + shippingPrice;
+        totalEl.textContent = `R${total.toFixed(2)}`;
+        totalEl.classList.add('confirmed');
+      }
+    };
+
+    // Init quantity display
+    qtyValue.textContent = '1';
+    qtySubtotal.textContent = `R${product.price.toFixed(2)}`;
+    qtyMinus.disabled = true;
+
+    qtyMinus.onclick = () => {
+      if (this.quantity > 1) { this.quantity--; updateTotal(); }
+    };
+    qtyPlus.onclick = () => {
+      if (this.quantity < 10) { this.quantity++; updateTotal(); }
+    };
+
+    // Build shipping options
     optionsContainer.innerHTML = '';
     Object.entries(this.shipping).forEach(([key, option]) => {
       const el = document.createElement('label');
@@ -253,21 +321,14 @@ class PayFastCheckout {
         document.querySelectorAll('.mla-shipping-option').forEach(o => o.classList.remove('selected'));
         el.classList.add('selected');
         this.selectedShipping = key;
-        const total = product.price + option.price;
-        totalEl.textContent = `R${total.toFixed(2)}`;
-        totalEl.classList.add('confirmed');
         proceedBtn.disabled = false;
+        updateTotal();
       });
       optionsContainer.appendChild(el);
     });
 
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
-  }
-
-  closeModal() {
-    document.getElementById('mlaModalOverlay').classList.remove('open');
-    document.body.style.overflow = '';
   }
 
   submitPayment(product, shippingOption, total) {
@@ -282,8 +343,8 @@ class PayFastCheckout {
       name_first: 'Customer',
       name_last: 'Purchase',
       email_address: 'customer@example.com',
-      item_name: `${product.name} + ${shippingOption.label}`,
-      item_description: `${product.description}. Shipping: ${shippingOption.description}`,
+      item_name: `${product.name} x${this.quantity} + ${shippingOption.label}`,
+      item_description: `${product.name} x${this.quantity} @ R${product.price.toFixed(2)} each. Shipping: ${shippingOption.label} (${shippingOption.description})`,
       custom_str1: reference,
       amount: total.toFixed(2),
       currency: PAYFAST_CONFIG.currency
@@ -305,7 +366,6 @@ class PayFastCheckout {
     document.body.appendChild(form);
     form.submit();
   }
-}
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => new PayFastCheckout());
