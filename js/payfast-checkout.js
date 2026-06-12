@@ -3,8 +3,7 @@ class PayFastCheckout {
     this.products = PAYFAST_CONFIG.products;
     this.shipping = PAYFAST_CONFIG.shipping;
     this.selectedShipping = null;
-    this.currentProduct = null;
-    this.quantity = 1;
+    this.quantities = { essential: 0, comfort: 0 };
     this.setupEventListeners();
     this.injectModal();
   }
@@ -14,17 +13,17 @@ class PayFastCheckout {
       button.addEventListener('click', (e) => {
         e.preventDefault();
         const productKey = button.dataset.product;
-        this.initiateCheckout(productKey);
+        this.openModal(productKey);
       });
     });
   }
 
-  initiateCheckout(productKey) {
-    const product = this.products[productKey];
-    if (!product) { alert('Product not found'); return; }
-    this.currentProduct = product;
-    this.selectedShipping = null;
-    this.openModal(product);
+  initiateCheckout() {
+    if (PAYFAST_CONFIG.merchantId === 'YOUR_MERCHANT_ID' ||
+        PAYFAST_CONFIG.merchantKey === 'YOUR_MERCHANT_KEY') {
+      alert('Payment system is not configured yet. Please contact us directly.');
+      return;
+    }
   }
 
   injectModal() {
@@ -83,12 +82,7 @@ class PayFastCheckout {
         font-size: 1.5rem;
         font-weight: 300;
         color: #372c21;
-        margin-bottom: 0.3rem;
-      }
-      .mla-modal-product-price {
-        font-size: 0.88rem;
-        color: #909180;
-        margin-bottom: 2rem;
+        margin-bottom: 1.6rem;
       }
       .mla-shipping-label {
         font-size: 0.7rem;
@@ -98,6 +92,101 @@ class PayFastCheckout {
         margin-bottom: 0.9rem;
         display: block;
       }
+      .mla-product-cards { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.6rem; }
+      .mla-product-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.2rem;
+        border: 1px solid #cfc1aa;
+        background: #fff;
+        transition: border-color 0.2s, background 0.2s;
+      }
+      .mla-product-card.has-qty {
+        border-color: #909180;
+        background: #ede5d8;
+      }
+      .mla-product-card-info { flex: 1; }
+      .mla-product-card-name {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #372c21;
+        display: block;
+        margin-bottom: 0.15rem;
+      }
+      .mla-product-card-price {
+        font-size: 0.78rem;
+        color: #909180;
+      }
+      .mla-product-qty-row {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+      .mla-qty-btn {
+        width: 2rem;
+        height: 2rem;
+        border: 1px solid #cfc1aa;
+        background: #fff;
+        color: #372c21;
+        font-size: 1.1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: border-color 0.2s, background 0.2s;
+        flex-shrink: 0;
+        line-height: 1;
+      }
+      .mla-qty-btn:hover { border-color: #909180; background: #ede5d8; }
+      .mla-qty-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+      .mla-qty-value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #372c21;
+        min-width: 1.2rem;
+        text-align: center;
+      }
+      .mla-fields-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem;
+        margin-bottom: 0.8rem;
+      }
+      .mla-field-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        margin-bottom: 0.8rem;
+      }
+      .mla-field-label {
+        font-size: 0.7rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #909180;
+      }
+      .mla-required { color: #909180; }
+      .mla-optional {
+        font-size: 0.65rem;
+        letter-spacing: 0.1em;
+        color: #909180;
+        opacity: 0.7;
+        text-transform: none;
+      }
+      .mla-field-input {
+        background: #fff;
+        border: 1px solid #cfc1aa;
+        padding: 0.75rem 1rem;
+        font-family: 'Nunito', sans-serif;
+        font-size: 0.88rem;
+        color: #372c21;
+        outline: none;
+        transition: border-color 0.2s;
+        width: 100%;
+        min-height: 44px;
+      }
+      .mla-field-input:focus { border-color: #909180; }
+      .mla-field-input.mla-error { border-color: #c0392b; }
       .mla-shipping-options { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 2rem; }
       .mla-shipping-option {
         display: flex;
@@ -184,81 +273,6 @@ class PayFastCheckout {
         text-align: center;
         margin-top: 0.9rem;
       }
-      .mla-quantity-row {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 0.5rem;
-      }
-      .mla-qty-btn {
-        width: 2.2rem;
-        height: 2.2rem;
-        border: 1px solid #cfc1aa;
-        background: #fff;
-        color: #372c21;
-        font-size: 1.2rem;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: border-color 0.2s, background 0.2s;
-        flex-shrink: 0;
-        line-height: 1;
-      }
-      .mla-qty-btn:hover { border-color: #909180; background: #ede5d8; }
-      .mla-qty-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-      .mla-qty-value {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #372c21;
-        min-width: 1.5rem;
-        text-align: center;
-      }
-      .mla-qty-subtotal {
-        font-size: 0.82rem;
-        color: #909180;
-        margin-left: 0.4rem;
-      }
-      .mla-fields-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.8rem;
-        margin-bottom: 0.8rem;
-      }
-      .mla-field-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.4rem;
-        margin-bottom: 0.8rem;
-      }
-      .mla-field-label {
-        font-size: 0.7rem;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        color: #909180;
-      }
-      .mla-required { color: #909180; }
-      .mla-optional {
-        font-size: 0.65rem;
-        letter-spacing: 0.1em;
-        color: #909180;
-        opacity: 0.7;
-        text-transform: none;
-      }
-      .mla-field-input {
-        background: #fff;
-        border: 1px solid #cfc1aa;
-        padding: 0.75rem 1rem;
-        font-family: 'Nunito', sans-serif;
-        font-size: 0.88rem;
-        color: #372c21;
-        outline: none;
-        transition: border-color 0.2s;
-        width: 100%;
-        min-height: 44px;
-      }
-      .mla-field-input:focus { border-color: #909180; }
-      .mla-field-input.mla-error { border-color: #c0392b; }
       .mla-validation-msg {
         font-size: 0.75rem;
         color: #c0392b;
@@ -278,9 +292,12 @@ class PayFastCheckout {
       <div class="mla-modal" role="dialog" aria-modal="true" aria-labelledby="mlaModalTitle">
         <button class="mla-modal-close" id="mlaModalClose" aria-label="Close">&times;</button>
         <p class="mla-modal-eyebrow">Almost there</p>
-        <h2 class="mla-modal-title" id="mlaModalTitle">Your details</h2>
-        <p class="mla-modal-product-price" id="mlaModalProductLine"></p>
+        <h2 class="mla-modal-title" id="mlaModalTitle">Your order</h2>
 
+        <span class="mla-shipping-label">Select products</span>
+        <div class="mla-product-cards" id="mlaProductCards"></div>
+
+        <span class="mla-shipping-label">Your details</span>
         <div class="mla-fields-row">
           <div class="mla-field-group">
             <label class="mla-field-label">First Name <span class="mla-required">*</span></label>
@@ -300,15 +317,7 @@ class PayFastCheckout {
           <input class="mla-field-input" type="tel" id="mlaPhone" placeholder="+27 71 000 0000">
         </div>
 
-        <span class="mla-shipping-label">Quantity</span>
-        <div class="mla-quantity-row">
-          <button class="mla-qty-btn" id="mlaQtyMinus">−</button>
-          <span class="mla-qty-value" id="mlaQtyValue">1</span>
-          <button class="mla-qty-btn" id="mlaQtyPlus">+</button>
-          <span class="mla-qty-subtotal" id="mlaQtySubtotal"></span>
-        </div>
-
-        <span class="mla-shipping-label" style="margin-top:1.6rem;">Delivery option</span>
+        <span class="mla-shipping-label">Delivery option</span>
         <div class="mla-shipping-options" id="mlaShippingOptions"></div>
         <hr class="mla-modal-divider">
         <div class="mla-modal-total">
@@ -327,59 +336,65 @@ class PayFastCheckout {
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') self.closeModal(); });
 
     document.getElementById('mlaModalProceed').addEventListener('click', () => {
-      if (self.selectedShipping && self.currentProduct) {
+      const firstName = document.getElementById('mlaFirstName').value.trim();
+      const lastName = document.getElementById('mlaLastName').value.trim();
+      const email = document.getElementById('mlaEmail').value.trim();
+      const phone = document.getElementById('mlaPhone').value.trim();
+      const validationMsg = document.getElementById('mlaValidationMsg');
 
-        // Get field values
-        const firstName = document.getElementById('mlaFirstName').value.trim();
-        const lastName = document.getElementById('mlaLastName').value.trim();
-        const email = document.getElementById('mlaEmail').value.trim();
-        const phone = document.getElementById('mlaPhone').value.trim();
-        const validationMsg = document.getElementById('mlaValidationMsg');
+      ['mlaFirstName','mlaLastName','mlaEmail'].forEach(id => {
+        document.getElementById(id).classList.remove('mla-error');
+      });
+      validationMsg.textContent = '';
 
-        // Clear previous errors
-        ['mlaFirstName','mlaLastName','mlaEmail'].forEach(id => {
-          document.getElementById(id).classList.remove('mla-error');
-        });
-        validationMsg.textContent = '';
-
-        // Validate
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!firstName) {
-          document.getElementById('mlaFirstName').classList.add('mla-error');
-          validationMsg.textContent = 'Please enter your first name.';
-          return;
-        }
-        if (!lastName) {
-          document.getElementById('mlaLastName').classList.add('mla-error');
-          validationMsg.textContent = 'Please enter your last name.';
-          return;
-        }
-        if (!email || !emailRegex.test(email)) {
-          document.getElementById('mlaEmail').classList.add('mla-error');
-          validationMsg.textContent = 'Please enter a valid email address.';
-          return;
-        }
-
-        const shippingOption = self.shipping[self.selectedShipping];
-        const total = (self.currentProduct.price * self.quantity) + shippingOption.price;
-        self.submitPayment(self.currentProduct, shippingOption, total, firstName, lastName, email, phone);
-        self.closeModal();
+      const totalQty = Object.values(self.quantities).reduce((a, b) => a + b, 0);
+      if (totalQty === 0) {
+        validationMsg.textContent = 'Please select at least one product.';
+        return;
       }
+      if (!firstName) {
+        document.getElementById('mlaFirstName').classList.add('mla-error');
+        validationMsg.textContent = 'Please enter your first name.';
+        return;
+      }
+      if (!lastName) {
+        document.getElementById('mlaLastName').classList.add('mla-error');
+        validationMsg.textContent = 'Please enter your last name.';
+        return;
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || !emailRegex.test(email)) {
+        document.getElementById('mlaEmail').classList.add('mla-error');
+        validationMsg.textContent = 'Please enter a valid email address.';
+        return;
+      }
+      if (!self.selectedShipping) {
+        validationMsg.textContent = 'Please select a delivery option.';
+        return;
+      }
+
+      const shippingOption = self.shipping[self.selectedShipping];
+      const productsTotal = Object.entries(self.quantities).reduce((sum, [key, qty]) => {
+        return sum + (self.products[key].price * qty);
+      }, 0);
+      const total = productsTotal + shippingOption.price;
+
+      self.submitPayment(shippingOption, total, firstName, lastName, email, phone);
+      self.closeModal();
     });
   }
 
-  openModal(product) {
+  openModal(preselectedProduct) {
+    const self = this;
     const overlay = document.getElementById('mlaModalOverlay');
-    const productLine = document.getElementById('mlaModalProductLine');
-    const optionsContainer = document.getElementById('mlaShippingOptions');
     const totalEl = document.getElementById('mlaTotalAmount');
     const proceedBtn = document.getElementById('mlaModalProceed');
-    const qtyValue = document.getElementById('mlaQtyValue');
-    const qtySubtotal = document.getElementById('mlaQtySubtotal');
-    const qtyMinus = document.getElementById('mlaQtyMinus');
-    const qtyPlus = document.getElementById('mlaQtyPlus');
 
-    // Reset fields
+    // Reset
+    this.selectedShipping = null;
+    this.quantities = { essential: 0, comfort: 0 };
+    if (preselectedProduct) this.quantities[preselectedProduct] = 1;
+
     document.getElementById('mlaFirstName').value = '';
     document.getElementById('mlaLastName').value = '';
     document.getElementById('mlaEmail').value = '';
@@ -389,32 +404,72 @@ class PayFastCheckout {
       document.getElementById(id).classList.remove('mla-error');
     });
 
-    // Quantity display update helper
+    totalEl.textContent = '—';
+    totalEl.classList.remove('confirmed');
+    proceedBtn.disabled = true;
+
     const updateTotal = () => {
-      const shippingPrice = this.selectedShipping ? this.shipping[this.selectedShipping].price : null;
-      qtySubtotal.textContent = `R${(product.price * this.quantity).toFixed(2)}`;
-      qtyMinus.disabled = this.quantity <= 1;
-      qtyValue.textContent = this.quantity;
-      if (shippingPrice !== null) {
-        const total = (product.price * this.quantity) + shippingPrice;
-        totalEl.textContent = `R${total.toFixed(2)}`;
+      const productsTotal = Object.entries(self.quantities).reduce((sum, [key, qty]) => {
+        return sum + (self.products[key].price * qty);
+      }, 0);
+      const shippingPrice = self.selectedShipping ? self.shipping[self.selectedShipping].price : null;
+      const totalQty = Object.values(self.quantities).reduce((a, b) => a + b, 0);
+
+      if (totalQty > 0 && shippingPrice !== null) {
+        totalEl.textContent = `R${(productsTotal + shippingPrice).toFixed(2)}`;
         totalEl.classList.add('confirmed');
+        proceedBtn.disabled = false;
+      } else {
+        totalEl.textContent = productsTotal > 0 ? `R${productsTotal.toFixed(2)}` : '—';
+        totalEl.classList.remove('confirmed');
+        proceedBtn.disabled = true;
       }
     };
 
-    // Init quantity display
-    qtyValue.textContent = '1';
-    qtySubtotal.textContent = `R${product.price.toFixed(2)}`;
-    qtyMinus.disabled = true;
+    // Build product cards
+    const cardsContainer = document.getElementById('mlaProductCards');
+    cardsContainer.innerHTML = '';
+    Object.entries(this.products).forEach(([key, product]) => {
+      const qty = this.quantities[key];
+      const card = document.createElement('div');
+      card.className = `mla-product-card${qty > 0 ? ' has-qty' : ''}`;
+      card.id = `mlaProductCard-${key}`;
+      card.innerHTML = `
+        <div class="mla-product-card-info">
+          <span class="mla-product-card-name">${product.name}</span>
+          <span class="mla-product-card-price">R${product.price.toFixed(2)} each</span>
+        </div>
+        <div class="mla-product-qty-row">
+          <button class="mla-qty-btn" id="mlaQtyMinus-${key}" ${qty <= 0 ? 'disabled' : ''}>−</button>
+          <span class="mla-qty-value" id="mlaQtyVal-${key}">${qty}</span>
+          <button class="mla-qty-btn" id="mlaQtyPlus-${key}">+</button>
+        </div>
+      `;
+      cardsContainer.appendChild(card);
 
-    qtyMinus.onclick = () => {
-      if (this.quantity > 1) { this.quantity--; updateTotal(); }
-    };
-    qtyPlus.onclick = () => {
-      if (this.quantity < 10) { this.quantity++; updateTotal(); }
-    };
+      document.getElementById(`mlaQtyMinus-${key}`).addEventListener('click', () => {
+        if (self.quantities[key] > 0) {
+          self.quantities[key]--;
+          document.getElementById(`mlaQtyVal-${key}`).textContent = self.quantities[key];
+          document.getElementById(`mlaQtyMinus-${key}`).disabled = self.quantities[key] <= 0;
+          card.classList.toggle('has-qty', self.quantities[key] > 0);
+          updateTotal();
+        }
+      });
+
+      document.getElementById(`mlaQtyPlus-${key}`).addEventListener('click', () => {
+        if (self.quantities[key] < 10) {
+          self.quantities[key]++;
+          document.getElementById(`mlaQtyVal-${key}`).textContent = self.quantities[key];
+          document.getElementById(`mlaQtyMinus-${key}`).disabled = false;
+          card.classList.add('has-qty');
+          updateTotal();
+        }
+      });
+    });
 
     // Build shipping options
+    const optionsContainer = document.getElementById('mlaShippingOptions');
     optionsContainer.innerHTML = '';
     Object.entries(this.shipping).forEach(([key, option]) => {
       const el = document.createElement('label');
@@ -430,8 +485,7 @@ class PayFastCheckout {
       el.querySelector('input').addEventListener('change', () => {
         document.querySelectorAll('.mla-shipping-option').forEach(o => o.classList.remove('selected'));
         el.classList.add('selected');
-        this.selectedShipping = key;
-        proceedBtn.disabled = false;
+        self.selectedShipping = key;
         updateTotal();
       });
       optionsContainer.appendChild(el);
@@ -441,8 +495,23 @@ class PayFastCheckout {
     document.body.style.overflow = 'hidden';
   }
 
-submitPayment(product, shippingOption, total, firstName, lastName, email, phone) {
+  closeModal() {
+    document.getElementById('mlaModalOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  submitPayment(shippingOption, total, firstName, lastName, email, phone) {
     const reference = `MLA-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+    const itemParts = Object.entries(this.quantities)
+      .filter(([, qty]) => qty > 0)
+      .map(([key, qty]) => `${this.products[key].name} x${qty}`);
+    const itemName = itemParts.join(' + ') + ` + ${shippingOption.label}`;
+
+    const descParts = Object.entries(this.quantities)
+      .filter(([, qty]) => qty > 0)
+      .map(([key, qty]) => `${this.products[key].name} x${qty} @ R${this.products[key].price.toFixed(2)}`);
+    const itemDesc = descParts.join(', ') + `. Shipping: ${shippingOption.label} (${shippingOption.description})`;
 
     const paymentData = {
       merchant_id: PAYFAST_CONFIG.merchantId,
@@ -454,8 +523,8 @@ submitPayment(product, shippingOption, total, firstName, lastName, email, phone)
       name_last: lastName,
       email_address: email,
       cell_number: phone || '',
-      item_name: `${product.name} x${this.quantity} + ${shippingOption.label}`,
-      item_description: `${product.name} x${this.quantity} @ R${product.price.toFixed(2)} each. Shipping: ${shippingOption.label} (${shippingOption.description})`,
+      item_name: itemName,
+      item_description: itemDesc,
       custom_str1: reference,
       amount: total.toFixed(2),
       currency: PAYFAST_CONFIG.currency
@@ -478,8 +547,9 @@ submitPayment(product, shippingOption, total, firstName, lastName, email, phone)
 
     document.body.appendChild(form);
     form.submit();
-    }
+  }
 }
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => new PayFastCheckout());
 } else {
