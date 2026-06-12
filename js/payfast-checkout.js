@@ -212,6 +212,55 @@ class PayFastCheckout {
         color: #909180;
         margin-left: 0.4rem;
       }
+      .mla-fields-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem;
+        margin-bottom: 0.8rem;
+      }
+      .mla-field-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        margin-bottom: 0.8rem;
+      }
+      .mla-field-label {
+        font-size: 0.7rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #909180;
+      }
+      .mla-required { color: #909180; }
+      .mla-optional {
+        font-size: 0.65rem;
+        letter-spacing: 0.1em;
+        color: #909180;
+        opacity: 0.7;
+        text-transform: none;
+      }
+      .mla-field-input {
+        background: #fff;
+        border: 1px solid #cfc1aa;
+        padding: 0.75rem 1rem;
+        font-family: 'Nunito', sans-serif;
+        font-size: 0.88rem;
+        color: #372c21;
+        outline: none;
+        transition: border-color 0.2s;
+        width: 100%;
+        min-height: 44px;
+      }
+      .mla-field-input:focus { border-color: #909180; }
+      .mla-field-input.mla-error { border-color: #c0392b; }
+      .mla-validation-msg {
+        font-size: 0.75rem;
+        color: #c0392b;
+        margin-bottom: 0.8rem;
+        min-height: 1rem;
+      }
+      @media (max-width: 480px) {
+        .mla-fields-row { grid-template-columns: 1fr; }
+      }
     `;
     document.head.appendChild(style);
 
@@ -222,8 +271,27 @@ class PayFastCheckout {
       <div class="mla-modal" role="dialog" aria-modal="true" aria-labelledby="mlaModalTitle">
         <button class="mla-modal-close" id="mlaModalClose" aria-label="Close">&times;</button>
         <p class="mla-modal-eyebrow">Almost there</p>
-        <h2 class="mla-modal-title" id="mlaModalTitle">Choose your options</h2>
+        <h2 class="mla-modal-title" id="mlaModalTitle">Your details</h2>
         <p class="mla-modal-product-price" id="mlaModalProductLine"></p>
+
+        <div class="mla-fields-row">
+          <div class="mla-field-group">
+            <label class="mla-field-label">First Name <span class="mla-required">*</span></label>
+            <input class="mla-field-input" type="text" id="mlaFirstName" placeholder="Jane">
+          </div>
+          <div class="mla-field-group">
+            <label class="mla-field-label">Last Name <span class="mla-required">*</span></label>
+            <input class="mla-field-input" type="text" id="mlaLastName" placeholder="Smith">
+          </div>
+        </div>
+        <div class="mla-field-group">
+          <label class="mla-field-label">Email Address <span class="mla-required">*</span></label>
+          <input class="mla-field-input" type="email" id="mlaEmail" placeholder="jane@example.com">
+        </div>
+        <div class="mla-field-group" style="margin-bottom:1.6rem;">
+          <label class="mla-field-label">Phone Number <span class="mla-optional">(optional)</span></label>
+          <input class="mla-field-input" type="tel" id="mlaPhone" placeholder="+27 71 000 0000">
+        </div>
 
         <span class="mla-shipping-label">Quantity</span>
         <div class="mla-quantity-row">
@@ -240,6 +308,7 @@ class PayFastCheckout {
           <span class="mla-modal-total-label">Total (incl. shipping)</span>
           <span class="mla-modal-total-amount" id="mlaTotalAmount">—</span>
         </div>
+        <div id="mlaValidationMsg" class="mla-validation-msg"></div>
         <button class="mla-modal-proceed" id="mlaModalProceed" disabled>Proceed to Payment</button>
         <p class="mla-modal-note">You'll be redirected to PayFast's secure checkout.</p>
       </div>
@@ -252,11 +321,43 @@ class PayFastCheckout {
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') self.closeModal(); });
 
     document.getElementById('mlaModalProceed').addEventListener('click', () => {
-      if (this.selectedShipping && this.currentProduct) {
-        const shippingOption = this.shipping[this.selectedShipping];
-        const total = (this.currentProduct.price * this.quantity) + shippingOption.price;
-        this.submitPayment(this.currentProduct, shippingOption, total);
-        this.closeModal();
+      if (self.selectedShipping && self.currentProduct) {
+
+        // Get field values
+        const firstName = document.getElementById('mlaFirstName').value.trim();
+        const lastName = document.getElementById('mlaLastName').value.trim();
+        const email = document.getElementById('mlaEmail').value.trim();
+        const phone = document.getElementById('mlaPhone').value.trim();
+        const validationMsg = document.getElementById('mlaValidationMsg');
+
+        // Clear previous errors
+        ['mlaFirstName','mlaLastName','mlaEmail'].forEach(id => {
+          document.getElementById(id).classList.remove('mla-error');
+        });
+        validationMsg.textContent = '';
+
+        // Validate
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!firstName) {
+          document.getElementById('mlaFirstName').classList.add('mla-error');
+          validationMsg.textContent = 'Please enter your first name.';
+          return;
+        }
+        if (!lastName) {
+          document.getElementById('mlaLastName').classList.add('mla-error');
+          validationMsg.textContent = 'Please enter your last name.';
+          return;
+        }
+        if (!email || !emailRegex.test(email)) {
+          document.getElementById('mlaEmail').classList.add('mla-error');
+          validationMsg.textContent = 'Please enter a valid email address.';
+          return;
+        }
+
+        const shippingOption = self.shipping[self.selectedShipping];
+        const total = (self.currentProduct.price * self.quantity) + shippingOption.price;
+        self.submitPayment(self.currentProduct, shippingOption, total, firstName, lastName, email, phone);
+        self.closeModal();
       }
     });
   }
@@ -272,13 +373,15 @@ class PayFastCheckout {
     const qtyMinus = document.getElementById('mlaQtyMinus');
     const qtyPlus = document.getElementById('mlaQtyPlus');
 
-    // Reset
-    productLine.textContent = `${product.name} — R${product.price.toFixed(2)} each`;
-    totalEl.textContent = '—';
-    totalEl.classList.remove('confirmed');
-    proceedBtn.disabled = true;
-    this.selectedShipping = null;
-    this.quantity = 1;
+    // Reset fields
+    document.getElementById('mlaFirstName').value = '';
+    document.getElementById('mlaLastName').value = '';
+    document.getElementById('mlaEmail').value = '';
+    document.getElementById('mlaPhone').value = '';
+    document.getElementById('mlaValidationMsg').textContent = '';
+    ['mlaFirstName','mlaLastName','mlaEmail'].forEach(id => {
+      document.getElementById(id).classList.remove('mla-error');
+    });
 
     // Quantity display update helper
     const updateTotal = () => {
@@ -332,7 +435,7 @@ class PayFastCheckout {
     document.body.style.overflow = 'hidden';
   }
 
-  submitPayment(product, shippingOption, total) {
+submitPayment(product, shippingOption, total, firstName, lastName, email, phone) {
     const reference = `MLA-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
     const paymentData = {
@@ -341,9 +444,10 @@ class PayFastCheckout {
       return_url: PAYFAST_CONFIG.returnUrl,
       cancel_url: PAYFAST_CONFIG.cancelUrl,
       notify_url: PAYFAST_CONFIG.notifyUrl,
-      name_first: 'Customer',
-      name_last: 'Purchase',
-      email_address: 'customer@example.com',
+      name_first: firstName,
+      name_last: lastName,
+      email_address: email,
+      cell_number: phone || '',
       item_name: `${product.name} x${this.quantity} + ${shippingOption.label}`,
       item_description: `${product.name} x${this.quantity} @ R${product.price.toFixed(2)} each. Shipping: ${shippingOption.label} (${shippingOption.description})`,
       custom_str1: reference,
@@ -357,16 +461,17 @@ class PayFastCheckout {
     form.style.display = 'none';
 
     for (let [key, value] of Object.entries(paymentData)) {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = key;
-      input.value = value;
-      form.appendChild(input);
+      if (value !== '') {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+      }
     }
 
     document.body.appendChild(form);
     form.submit();
-  }
 }
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => new PayFastCheckout());
