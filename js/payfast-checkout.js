@@ -186,9 +186,18 @@ class PayFastCheckout {
       <div class="mla-modal" role="dialog" aria-modal="true" aria-labelledby="mlaModalTitle">
         <button class="mla-modal-close" id="mlaModalClose" aria-label="Close">&times;</button>
         <p class="mla-modal-eyebrow">Almost there</p>
-        <h2 class="mla-modal-title" id="mlaModalTitle">Choose your shipping</h2>
+        <h2 class="mla-modal-title" id="mlaModalTitle">Choose your options</h2>
         <p class="mla-modal-product-price" id="mlaModalProductLine"></p>
-        <span class="mla-shipping-label">Delivery option</span>
+
+        <span class="mla-shipping-label">Quantity</span>
+        <div class="mla-quantity-row">
+          <button class="mla-qty-btn" id="mlaQtyMinus">−</button>
+          <span class="mla-qty-value" id="mlaQtyValue">1</span>
+          <button class="mla-qty-btn" id="mlaQtyPlus">+</button>
+          <span class="mla-qty-subtotal" id="mlaQtySubtotal"></span>
+        </div>
+
+        <span class="mla-shipping-label" style="margin-top:1.6rem;">Delivery option</span>
         <div class="mla-shipping-options" id="mlaShippingOptions"></div>
         <hr class="mla-modal-divider">
         <div class="mla-modal-total">
