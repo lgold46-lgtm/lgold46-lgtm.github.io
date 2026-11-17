@@ -1082,6 +1082,29 @@ navLinks.querySelectorAll('a').forEach(link => {
     navLinks.classList.remove('open');
   });
 });
+    document.getElementById('sendMessageBtn').addEventListener('click', () => {
+    const first   = document.getElementById('cfFirstName').value.trim();
+    const last    = document.getElementById('cfLastName').value.trim();
+    const email   = document.getElementById('cfEmail').value.trim();
+    const topic   = document.getElementById('cfTopic').value;
+    const message = document.getElementById('cfMessage').value.trim();
+
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!first || !emailOk || !message) {
+      alert('Please enter your first name, a valid email address and a message.');
+      return;
+    }
+
+    const subject = encodeURIComponent('Website enquiry' + (topic ? ' - ' + topic : ''));
+    const body = encodeURIComponent(
+      'Name: ' + first + ' ' + last + '\n' +
+      'Email: ' + email + '\n' +
+      (topic ? 'Topic: ' + topic + '\n' : '') +
+      '\n' + message
+    );
+
+    window.location.href = 'mailto:masonslittleaid@icloud.com?subject=' + subject + '&body=' + body;
+  });
 </script>
 
 <!-- PayFast Integration -->
